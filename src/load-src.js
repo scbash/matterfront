@@ -64,6 +64,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (newBadge !== false) {
             setBadge(newBadge);
+            if (newBadge == '') {
+                notifyOS(false);
+            }
+            else {
+                notifyOS(true);
+            }
         }
 
         pendingUpdate = null;
@@ -73,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (process.platform === 'darwin') {
             if (bounceId) app.dock.cancelBounce(bounceId);
             if (flag) {
-                bounceId = app.dock.bounce('critical');
+                bounceId = app.dock.bounce('informational');
             }
         } else if (process.platform === 'win32') {
             mainWindow.flashFrame(flag)

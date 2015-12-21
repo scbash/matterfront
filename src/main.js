@@ -1,16 +1,15 @@
-var app = require('app');  // Module to control application life.
-var BrowserWindow = require('browser-window');  // Module to create native browser window.
+var app = require('app');
+var BrowserWindow = require('browser-window');
+var menu = require('./menu.js');
 var path = require('path');
-var fs = require('fs');
-// Report crashes to our server.
+var settings = require('./settings.js');
 
-require('crash-reporter').start();
+settings.load();
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 var mainWindow = null;
 
-// Quit when all windows are closed.
 app.on('window-all-closed', function() {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
@@ -19,29 +18,32 @@ app.on('window-all-closed', function() {
   }
 });
 
+var getFirstTeam = function(){
+  var teams = settings.get('teams');
+  if (Array.isArray(teams) && teams.length > 0){
+    return teams[0];
+  } else {
+    var noTeamsPath = path.join('file://', __dirname, 'browser/nosrc.html');
+    return noTeamsPath;
+  }
+};
+
+var getIndexPath = function(){
+  if (settings.get("dev-mode")){
+    return path.join('file://', __dirname, 'browser/index-dev.html');
+  } else {
+    return path.join('file://', __dirname, 'browser/index.html');
+  }
+};
+
 app.on('ready', function() {
   var quitting = false;
-  mainWindow = new BrowserWindow({width: 1024, height: 600});
-  var config = {};
-  var configPaths = [
-    path.join('.', 'config.json'),
-    path.join(app.getPath('userData'), 'config.json'),
-    path.join(app.getAppPath(), 'config.json'),
-  ];
-  for (var i = 0; i < configPaths.length; i++) {
-    try {
-      config = JSON.parse(fs.readFileSync(configPaths[i]));
-      break;
-    } catch(e) {
-      if (e instanceof Error && e.code === 'ENOENT') {
-        // next
-      } else { throw e; }
-    }
-  }
+  mainWindow = new BrowserWindow(settings.get('window'));
 
-  var src = config['url'] || 'file://' + __dirname + '/nosrc.html';
-
-  mainWindow.loadUrl('file://' + __dirname + '/index.html' + '?src=' + encodeURIComponent(src));
+  var team = getFirstTeam();
+  var teamUrl = encodeURIComponent(team.url);
+  var indexPath = getIndexPath();
+  mainWindow.loadURL(indexPath + '?teamUrl=' + teamUrl);
 
   app.on('activate', function(e, hasVisibleWindows) {
     if (hasVisibleWindows) {
@@ -60,6 +62,16 @@ app.on('ready', function() {
   });
 
   mainWindow.on('close', function(e) {
+    settings.set('window:fullscreen', mainWindow.isFullScreen());
+    if (!mainWindow.isFullScreen()) {
+      var bounds = mainWindow.getBounds();
+      settings.set('window:x', bounds.x);
+      settings.set('window:y', bounds.y);
+      settings.set('window:width', bounds.width);
+      settings.set('window:height', bounds.height);
+    }
+    settings.saveState();
+
     if (process.platform != 'darwin') { return; }
     if (quitting) { return; }
 
@@ -68,10 +80,12 @@ app.on('ready', function() {
   });
 
   mainWindow.webContents.on('will-navigate', function (e) {
-      e.preventDefault();
+    e.preventDefault();
   });
 
   mainWindow.on('closed', function() {
     mainWindow = null;
   });
+
+  menu.load();
 });

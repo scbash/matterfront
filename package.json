@@ -9,9 +9,10 @@
   ],
   "scripts": {
     "start": "electron ./src",
-    "build": "electron-packager ./src Matterfront --out=dist --ignore='^/dist$' --prune --asar --platform=linux,darwin --arch=x64 --version=$npm_package_electronVersion --app-bundle-id='org.matterfront.app' --app-version=$npm_package_version --helper-bundle-id='org.matterfront.app.helper' --overwrite --icon=resources/mattermost && electron-packager ./src Matterfront --out=dist --ignore='^/dist$' --prune --asar --platform=win32 --arch=x64 --version=$npm_package_electronVersion --app-bundle-id='org.matterfront.app' --app-version=$npm_package_version --helper-bundle-id='org.matterfront.app.helper' --overwrite"
+    "build": "electron-packager ./src Matterfront --out=dist --ignore='^/dist$' --prune --asar --platform=linux,darwin --arch=x64 --version=$npm_package_electronVersion --app-bundle-id='org.matterfront.app' --app-version=$npm_package_version --helper-bundle-id='org.matterfront.app.helper' --overwrite --icon=resources/mattermost && electron-packager ./src Matterfront --out=dist --ignore='^/dist$' --prune --asar --platform=win32 --arch=x64 --version=$npm_package_electronVersionWin --app-bundle-id='org.matterfront.app' --app-version=$npm_package_version --helper-bundle-id='org.matterfront.app.helper' --overwrite"
   },
   "electronVersion": "0.34.3",
+  "electronVersionWin": "0.34.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/lloeki/matterfront"
